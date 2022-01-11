@@ -1,18 +1,12 @@
-﻿using Microsoft.Win32;
+﻿using LandmarkAI.Models;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Net.Http;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace LandmarkAI
 {
@@ -30,14 +24,35 @@ namespace LandmarkAI
         {
             var dialog = new OpenFileDialog
             {
-                Filter = "Image files(*.png; *.jpg)|*.png;*.jpg;*.jpeg|All files (*.*)|*.*"
+                Filter = "Image files(*.png; *.jpg)|*.png;*.jpg;*.jpeg|All files (*.*)|*.*",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
             };
 
             if (dialog.ShowDialog() == true)
             {
                 var fileName = dialog.FileName;
                 selectedImage.Source = new BitmapImage(new Uri(fileName));
+
+                MakePredictionAsync(fileName);
             }
+        }
+
+        private async void MakePredictionAsync(string fileName)
+        {
+            var file = File.ReadAllBytes(fileName);
+
+            using var client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Prediction-Key", App.PredictionKey);
+
+            using var content = new ByteArrayContent(file);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(App.PredictionType);
+
+            var response = await client.PostAsync(App.PredictionUrl, content);
+
+            var data = await response.Content.ReadAsStringAsync();
+
+            var predictions = JsonConvert.DeserializeObject<CustomVisionResponse>(data)?.Predictions ?? new List<Prediction>();
         }
     }
 }
