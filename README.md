@@ -1,6 +1,6 @@
 # Landmark AI WPF App
 
-Using Microsoft's [CustomVision AI] to analyze local images.
+Using Microsoft's [CustomVision AI](https://www.customvision.ai) to analyze local images.
 
 ## Features
 
