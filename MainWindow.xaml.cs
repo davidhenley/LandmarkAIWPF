@@ -20,7 +20,7 @@ namespace LandmarkAI
             InitializeComponent();
         }
 
-        private void SelectImageButton_Click(object sender, RoutedEventArgs e)
+        private void selectImageButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog
             {
@@ -30,6 +30,8 @@ namespace LandmarkAI
 
             if (dialog.ShowDialog() == true)
             {
+                predictionsTextBox.ItemsSource = new List<Prediction>();
+
                 var fileName = dialog.FileName;
                 selectedImage.Source = new BitmapImage(new Uri(fileName));
 
@@ -53,6 +55,8 @@ namespace LandmarkAI
             var data = await response.Content.ReadAsStringAsync();
 
             var predictions = JsonConvert.DeserializeObject<CustomVisionResponse>(data)?.Predictions ?? new List<Prediction>();
+
+            predictionsTextBox.ItemsSource = predictions;
         }
     }
 }
